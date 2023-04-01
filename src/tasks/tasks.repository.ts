@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { inject, singleton } from "tsyringe";
 import { AppPrismaClient } from "../db";
+import { Task } from "./interfaces/Task";
 import {
   CreateTaskInput,
   CreateTaskOutput,
@@ -28,7 +29,7 @@ export default class TaskRespository {
     ]);
 
     return {
-      tasks,
+      tasks: tasks as Task[],
       paginationMeta: {
         pageNumber,
         pageSize,
@@ -37,10 +38,38 @@ export default class TaskRespository {
     };
   }
 
+  async getTaskById(id: number): Promise<Task> {
+    return this.client.task.findUnique({
+      where: {
+        id,
+      },
+    }) as Promise<Task>;
+  }
+
   async createTask({ title }: CreateTaskInput): Promise<CreateTaskOutput> {
     return this.client.task.create({
       data: {
         title,
+      },
+    }) as Promise<Task>;
+  }
+
+  async updateTask(
+    id: number,
+    data: Pick<Task, "title" | "status">
+  ): Promise<Task> {
+    return this.client.task.update({
+      where: {
+        id,
+      },
+      data,
+    }) as Promise<Task>;
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    await this.client.task.delete({
+      where: {
+        id,
       },
     });
   }

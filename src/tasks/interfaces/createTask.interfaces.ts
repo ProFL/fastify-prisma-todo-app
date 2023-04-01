@@ -1,4 +1,4 @@
-import { Task } from "@prisma/client";
+import { Task } from "./Task";
 
 export type CreateTaskInput = {
   title: string;

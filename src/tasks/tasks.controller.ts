@@ -64,10 +64,13 @@ export default class TasksController implements Controller {
                     type: "array",
                     items: {
                       ...taskSchema,
-                      links: {
-                        type: "object",
-                        properties: {
-                          self: { type: "string" },
+                      properties: {
+                        ...taskSchema.properties,
+                        links: {
+                          type: "object",
+                          properties: {
+                            self: { type: "string" },
+                          },
                         },
                       },
                     },
@@ -122,6 +125,36 @@ export default class TasksController implements Controller {
         },
         this.createTaskHandler.bind(this)
       );
+
+      fastify.get(
+        `${prefix}/:taskId`,
+        {
+          schema: {
+            params: {
+              type: "object",
+              properties: {
+                taskId: { type: "number" },
+              },
+              required: ["taskId"],
+            },
+            response: {
+              200: {
+                type: "object",
+                properties: {
+                  links: {
+                    type: "object",
+                    properties: {
+                      self: { type: "string" },
+                    },
+                  },
+                  data: taskSchema,
+                },
+              },
+            },
+          },
+        },
+        this.getTaskHandler.bind(this)
+      );
     };
   }
 
@@ -139,11 +172,11 @@ export default class TasksController implements Controller {
     return {
       links: buildPaginationLinks(baseUrl, request.url, paginationMeta),
       data: tasks.map(({ id, ...attributes }) => ({
-        id: id,
         type: "tasks",
+        id: id,
         attributes,
         links: {
-          self: `${baseUrl}${request.routerPath}/${id}`,
+          self: `${baseUrl}${request.url}/${id}`,
         },
       })),
     };
@@ -166,8 +199,32 @@ export default class TasksController implements Controller {
         type: "tasks",
         attributes: attributes,
         links: {
-          self: `${baseUrl}${request.routerPath}/${id}`,
+          self: `${baseUrl}${request.url}/${id}`,
         },
+      },
+    };
+  }
+
+  async getTaskHandler(request: FastifyRequest, reply: FastifyReply) {
+    const { taskId } = request.params as { taskId: number };
+
+    const task = await this.taskRepository.getTaskById(taskId);
+
+    if (!task) {
+      reply.code(404);
+      return;
+    }
+
+    const baseUrl = extractBaseUrlFromRequest(request);
+    const { id, ...attributes } = task;
+    return {
+      links: {
+        self: `${baseUrl}${request.url}`,
+      },
+      data: {
+        id: id,
+        type: "tasks",
+        attributes: attributes,
       },
     };
   }

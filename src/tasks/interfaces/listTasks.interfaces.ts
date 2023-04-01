@@ -1,5 +1,5 @@
-import { Task } from "@prisma/client";
 import { PaginationInput, PaginationMeta } from "../../helpers/interfaces";
+import { Task } from "./Task";
 
 export type ListTasksInput = PaginationInput;
 

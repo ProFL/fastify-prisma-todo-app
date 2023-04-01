@@ -4,6 +4,7 @@ import {
   FastifyReply,
   FastifyRequest,
 } from "fastify";
+import { StatusCodes } from "http-status-codes";
 import { inject, singleton } from "tsyringe";
 import buildPaginationLinks from "../helpers/buildPaginationLinks";
 import extractBaseUrlFromRequest from "../helpers/extractBaseUrlFromRequest";
@@ -11,6 +12,7 @@ import { Controller, JSONApiPaginationQuery } from "../helpers/interfaces";
 import { UpdateTaskInput } from "./interfaces/updateTask.interfaces";
 import {
   CREATE_TASK_SCHEMA,
+  DELETE_TASK_SCHEMA,
   GET_TASK_SCHEMA,
   LIST_TASKS_SCHEMA,
   UPDATE_TASK_SCHEMA,
@@ -51,6 +53,13 @@ export default class TasksController implements Controller {
         url: `${prefix}/:taskId`,
         schema: UPDATE_TASK_SCHEMA,
         handler: this.updateTaskHandler.bind(this),
+      });
+
+      fastify.route({
+        method: "DELETE",
+        url: `${prefix}/:taskId`,
+        schema: DELETE_TASK_SCHEMA,
+        handler: this.deleteTask.bind(this),
       });
     };
   }
@@ -145,5 +154,13 @@ export default class TasksController implements Controller {
         attributes: attributes,
       },
     };
+  }
+
+  async deleteTask(request: FastifyRequest, reply: FastifyReply) {
+    const { taskId } = request.params as { taskId: number };
+
+    await this.taskRepository.deleteTask(taskId);
+
+    reply.code(StatusCodes.NO_CONTENT);
   }
 }

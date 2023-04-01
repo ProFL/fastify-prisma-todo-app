@@ -73,7 +73,7 @@ export default class TaskRespository {
   }
 
   async deleteTask(id: number): Promise<void> {
-    await this.client.task.delete({
+    await this.client.task.deleteMany({
       where: {
         id,
       },

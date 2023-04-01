@@ -32,8 +32,31 @@ export default async () => {
   const testDbUrlStr = testDbUrl.toString();
 
   console.log("Resetting and migrating test database...");
-  exec(`DATABASE_URL=${testDbUrlStr} npx prisma migrate reset --force`);
-  exec(`DATABASE_URL=${testDbUrlStr} npx prisma migrate deploy`);
+  await new Promise<void>((resolve, reject) => {
+    exec(
+      `DATABASE_URL=${testDbUrlStr} npx prisma migrate reset --force`,
+      (err, stdout, stderr) => {
+        console.log(stdout);
+        if (err) {
+          console.error(stderr);
+          reject(err);
+        } else {
+          exec(
+            `DATABASE_URL=${testDbUrlStr} npx prisma migrate deploy`,
+            (err, stdout, stderr) => {
+              console.log(stdout);
+              if (err) {
+                console.error(stderr);
+                reject(err);
+              } else {
+                resolve();
+              }
+            }
+          );
+        }
+      }
+    );
+  });
 
   console.log("Connecting to the test database...");
   client = new PrismaClient({

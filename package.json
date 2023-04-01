@@ -6,6 +6,9 @@
   "license": "UNLICENSED",
   "main": "dist/server.js",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node dist/server.js",
     "start:dev": "ts-node-dev --exit-child src/server.ts",

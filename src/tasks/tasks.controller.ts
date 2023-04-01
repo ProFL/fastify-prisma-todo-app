@@ -8,10 +8,12 @@ import { inject, singleton } from "tsyringe";
 import buildPaginationLinks from "../helpers/buildPaginationLinks";
 import extractBaseUrlFromRequest from "../helpers/extractBaseUrlFromRequest";
 import { Controller, JSONApiPaginationQuery } from "../helpers/interfaces";
+import { UpdateTaskInput } from "./interfaces/updateTask.interfaces";
 import {
   CREATE_TASK_SCHEMA,
   GET_TASK_SCHEMA,
   LIST_TASKS_SCHEMA,
+  UPDATE_TASK_SCHEMA,
 } from "./schemas";
 import TaskRespository from "./tasks.repository";
 
@@ -42,6 +44,13 @@ export default class TasksController implements Controller {
         url: `${prefix}/:taskId`,
         schema: GET_TASK_SCHEMA,
         handler: this.getTaskHandler.bind(this),
+      });
+
+      fastify.route({
+        method: "PUT",
+        url: `${prefix}/:taskId`,
+        schema: UPDATE_TASK_SCHEMA,
+        handler: this.updateTaskHandler.bind(this),
       });
     };
   }
@@ -97,6 +106,37 @@ export default class TasksController implements Controller {
     const { taskId } = request.params as { taskId: number };
 
     const task = await this.taskRepository.getTaskById(taskId);
+
+    if (!task) {
+      reply.code(404);
+      return;
+    }
+
+    const baseUrl = extractBaseUrlFromRequest(request);
+    const { id, ...attributes } = task;
+    return {
+      links: {
+        self: `${baseUrl}${request.url}`,
+      },
+      data: {
+        id: id,
+        type: "tasks",
+        attributes: attributes,
+      },
+    };
+  }
+
+  async updateTaskHandler(request: FastifyRequest, reply: FastifyReply) {
+    const { taskId } = request.params as { taskId: number };
+
+    const { data } = request.body as {
+      data: { attributes: UpdateTaskInput };
+    };
+
+    const task = await this.taskRepository.updateTask(taskId, {
+      title: data.attributes.title,
+      status: data.attributes.status,
+    });
 
     if (!task) {
       reply.code(404);

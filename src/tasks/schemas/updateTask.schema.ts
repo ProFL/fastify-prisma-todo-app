@@ -1,7 +1,13 @@
 import TASK_SCHEMA from "./task.schema";
 
-
 export default {
+  params: {
+    type: "object",
+    properties: {
+      taskId: { type: "number" },
+    },
+    required: ["taskId"],
+  },
   body: {
     type: "object",
     properties: {
@@ -12,9 +18,10 @@ export default {
           attributes: {
             type: "object",
             properties: {
-              title: { type: "string" },
+              title: TASK_SCHEMA.properties.attributes.properties.title,
+              status: TASK_SCHEMA.properties.attributes.properties.status,
             },
-            required: ["title"],
+            required: ["title", "status"],
           },
         },
         required: ["attributes"],

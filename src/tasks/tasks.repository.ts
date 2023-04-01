@@ -63,6 +63,7 @@ export default class TaskRespository {
     id: number,
     data: Pick<Task, "title" | "status">
   ): Promise<Task> {
+    await this.getTaskById(id);
     return this.client.task.update({
       where: {
         id,

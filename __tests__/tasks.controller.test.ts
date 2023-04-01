@@ -87,4 +87,48 @@ describe("/tasks", () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe("PUT /:taskId", () => {
+    it("should return the task updated with the given id", async () => {
+      const task = await client.task.create({
+        data: { title: "Task 1" },
+      });
+      const payload = {
+        data: {
+          type: "tasks",
+          attributes: {
+            title: "Task 1 updated",
+            status: "DOING",
+          },
+        },
+      };
+
+      const res = await request(server).put(`/tasks/${task.id}`).send(payload);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.id).toBe(task.id);
+      expect(res.body.data.attributes.title).toBe(
+        payload.data.attributes.title
+      );
+      expect(res.body.data.attributes.status).toBe(
+        payload.data.attributes.status
+      );
+    });
+
+    it("should 404 if a task with the given id is not found", async () => {
+      const payload = {
+        data: {
+          type: "tasks",
+          attributes: {
+            title: "Task 1 updated",
+            status: "DOING",
+          },
+        },
+      };
+
+      const res = await request(server).put(`/tasks/999`).send(payload);
+
+      expect(res.status).toBe(404);
+    });
+  });
 });

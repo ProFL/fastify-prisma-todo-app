@@ -16,23 +16,29 @@ export default function buildPaginationLinks(
   url.searchParams.set("page[number]", paginationMeta.pageCount.toString());
   const last = url.toString();
 
-  url.searchParams.set(
-    "page[number]",
-    (paginationMeta.pageNumber - 1 > 1
-      ? paginationMeta.pageNumber - 1
-      : 1
-    ).toString()
-  );
-  const prev = url.toString();
+  let prev = null;
+  if (paginationMeta.pageNumber != 1) {
+    url.searchParams.set(
+      "page[number]",
+      (paginationMeta.pageNumber - 1 > 1
+        ? paginationMeta.pageNumber - 1
+        : 1
+      ).toString()
+    );
+    prev = url.toString();
+  }
 
-  url.searchParams.set(
-    "page[number]",
-    (paginationMeta.pageNumber + 1 < paginationMeta.pageCount
-      ? paginationMeta.pageNumber + 1
-      : paginationMeta.pageCount
-    ).toString()
-  );
-  const next = url.toString();
+  let next = null;
+  if (paginationMeta.pageNumber < paginationMeta.pageCount) {
+    url.searchParams.set(
+      "page[number]",
+      (paginationMeta.pageNumber + 1 < paginationMeta.pageCount
+        ? paginationMeta.pageNumber + 1
+        : paginationMeta.pageCount
+      ).toString()
+    );
+    next = url.toString();
+  }
 
   return {
     self,

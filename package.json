@@ -12,7 +12,9 @@
     "start:debug": "ts-node-dev --inspect=0.0.0.0:9229 --exit-child src/server.ts",
     "build": "rimraf dist && tsc",
     "test": "jest",
-    "test:debug": "node --inspect-brk=0.0.0.0:9229 ./node_modules/jest/bin/jest.js"
+    "test:debug": "node --inspect-brk=0.0.0.0:9229 ./node_modules/jest/bin/jest.js",
+    "test:e2e": "jest --config=./jest.e2e.config.ts",
+    "test:e2e:debug": "node --inspect-brk=0.0.0.0:9229 ./node_modules/jest/bin/jest.js --config=./jest.e2e.config.ts"
   },
   "dependencies": {
     "@prisma/client": "^4.12.0",

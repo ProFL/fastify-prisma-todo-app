@@ -4,8 +4,7 @@ const config: import("jest").Config = {
   collectCoverage: true,
   coverageDirectory: "coverage",
   coverageProvider: "v8",
-  testRegex: "((\\.|/)(test|spec))\\.ts?$",
-  globalSetup: "./__tests__/setup.ts",
+  testRegex: "./src/.*.spec.ts$",
 };
 
 export default config;

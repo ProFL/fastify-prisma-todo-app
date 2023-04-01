@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { inject, singleton } from "tsyringe";
 import { AppPrismaClient } from "../db";
+import RecordNotFoundError from "../errors/recordNotFound.error";
 import { Task } from "./interfaces/Task";
 import {
   CreateTaskInput,
@@ -39,11 +40,15 @@ export default class TaskRespository {
   }
 
   async getTaskById(id: number): Promise<Task> {
-    return this.client.task.findUnique({
+    const task = (await this.client.task.findUnique({
       where: {
         id,
       },
-    }) as Promise<Task>;
+    })) as Task;
+    if (!task) {
+      throw new RecordNotFoundError(`Task with id ${id} not found`);
+    }
+    return task;
   }
 
   async createTask({ title }: CreateTaskInput): Promise<CreateTaskOutput> {

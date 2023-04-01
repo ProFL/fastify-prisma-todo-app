@@ -3,6 +3,7 @@ import fastify, { FastifyInstance } from "fastify";
 import { inject, singleton } from "tsyringe";
 import { v4 as uuid } from "uuid";
 import { AppPrismaClient } from "./db";
+import JSONAPIError from "./errors/jsonApi.error";
 import TasksController from "./tasks/tasks.controller";
 
 @singleton()
@@ -55,6 +56,20 @@ export default class AppFactory {
 
     this.setupHooks();
     this.setupRoutes();
+
+    this.app.setErrorHandler((error, request, reply) => {
+      if (error instanceof JSONAPIError) {
+        reply.code(error.statusCode);
+        reply.send(error.jsonError);
+      } else {
+        this.app.log.error(error);
+        reply.code(500);
+        reply.send({
+          status: "Internal Server Error",
+          title: "Something went wrong while processing your request",
+        });
+      }
+    });
 
     return this.app;
   }

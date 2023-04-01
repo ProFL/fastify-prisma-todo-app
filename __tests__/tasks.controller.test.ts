@@ -46,20 +46,6 @@ describe("/tasks", () => {
     });
   });
 
-  describe("GET /:taskId", () => {
-    it("should return the task with the given id", async () => {
-      const task = await client.task.create({
-        data: { title: "Task 1" },
-      });
-
-      const res = await request(server).get(`/tasks/${task.id}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.id).toBe(task.id.toString());
-      expect(res.body.data.attributes.title).toBe(task.title);
-    });
-  });
-
   describe("POST /", () => {
     it("should create a new post", async () => {
       const payload = {
@@ -79,6 +65,26 @@ describe("/tasks", () => {
       expect(res.body.data.attributes.title).toBe(
         payload.data.attributes.title
       );
+    });
+  });
+
+  describe("GET /:taskId", () => {
+    it("should return the task with the given id", async () => {
+      const task = await client.task.create({
+        data: { title: "Task 1" },
+      });
+
+      const res = await request(server).get(`/tasks/${task.id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.id).toBe(task.id.toString());
+      expect(res.body.data.attributes.title).toBe(task.title);
+    });
+
+    it("should 404 if a task with the given id is not found", async () => {
+      const res = await request(server).get(`/tasks/999`);
+
+      expect(res.status).toBe(404);
     });
   });
 });

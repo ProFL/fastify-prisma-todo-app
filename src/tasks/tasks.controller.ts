@@ -107,11 +107,6 @@ export default class TasksController implements Controller {
 
     const task = await this.taskRepository.getTaskById(taskId);
 
-    if (!task) {
-      reply.code(404);
-      return;
-    }
-
     const baseUrl = extractBaseUrlFromRequest(request);
     const { id, ...attributes } = task;
     return {
@@ -137,11 +132,6 @@ export default class TasksController implements Controller {
       title: data.attributes.title,
       status: data.attributes.status,
     });
-
-    if (!task) {
-      reply.code(404);
-      return;
-    }
 
     const baseUrl = extractBaseUrlFromRequest(request);
     const { id, ...attributes } = task;

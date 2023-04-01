@@ -8,6 +8,11 @@ import { inject, singleton } from "tsyringe";
 import buildPaginationLinks from "../helpers/buildPaginationLinks";
 import extractBaseUrlFromRequest from "../helpers/extractBaseUrlFromRequest";
 import { Controller, JSONApiPaginationQuery } from "../helpers/interfaces";
+import {
+  CREATE_TASK_SCHEMA,
+  GET_TASK_SCHEMA,
+  LIST_TASKS_SCHEMA,
+} from "./schemas";
 import TaskRespository from "./tasks.repository";
 
 @singleton()
@@ -18,143 +23,26 @@ export default class TasksController implements Controller {
 
   buildFastifyPlugin(prefix: string = "/"): FastifyPluginAsync {
     return async (fastify: FastifyInstance, options: unknown) => {
-      const taskSchema = {
-        type: "object",
-        properties: {
-          type: { type: "string", enum: ["tasks"] },
-          id: { type: "string" },
-          attributes: {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              status: { type: "string", enum: ["TO_DO", "DOING", "DONE"] },
-              createdAt: { type: "string" },
-              updatedAt: { type: "string" },
-            },
-          },
-        },
-      };
+      fastify.route({
+        method: "GET",
+        url: prefix,
+        schema: LIST_TASKS_SCHEMA,
+        handler: this.listTasksHandler.bind(this),
+      });
 
-      fastify.get(
-        `${prefix}`,
-        {
-          schema: {
-            querystring: {
-              type: "object",
-              properties: {
-                "page[size]": { type: "number" },
-                "page[number]": { type: "number" },
-              },
-            },
-            response: {
-              200: {
-                type: "object",
-                properties: {
-                  links: {
-                    type: "object",
-                    properties: {
-                      self: { type: "string" },
-                      first: { type: "string" },
-                      last: { type: "string" },
-                      prev: { type: "string" },
-                      next: { type: "string" },
-                    },
-                  },
-                  data: {
-                    type: "array",
-                    items: {
-                      ...taskSchema,
-                      properties: {
-                        ...taskSchema.properties,
-                        links: {
-                          type: "object",
-                          properties: {
-                            self: { type: "string" },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        this.listTasksHandler.bind(this)
-      );
+      fastify.route({
+        method: "POST",
+        url: prefix,
+        schema: CREATE_TASK_SCHEMA,
+        handler: this.createTaskHandler.bind(this),
+      });
 
-      fastify.post(
-        prefix,
-        {
-          schema: {
-            body: {
-              type: "object",
-              properties: {
-                data: {
-                  type: "object",
-                  properties: {
-                    type: { type: "string", enum: ["tasks"] },
-                    attributes: {
-                      type: "object",
-                      properties: {
-                        title: { type: "string" },
-                      },
-                      required: ["title"],
-                    },
-                  },
-                  required: ["type", "attributes"],
-                },
-              },
-              required: ["data"],
-            },
-            response: {
-              201: {
-                type: "object",
-                properties: {
-                  links: {
-                    type: "object",
-                    properties: {
-                      self: { type: "string" },
-                    },
-                  },
-                  data: taskSchema,
-                },
-              },
-            },
-          },
-        },
-        this.createTaskHandler.bind(this)
-      );
-
-      fastify.get(
-        `${prefix}/:taskId`,
-        {
-          schema: {
-            params: {
-              type: "object",
-              properties: {
-                taskId: { type: "number" },
-              },
-              required: ["taskId"],
-            },
-            response: {
-              200: {
-                type: "object",
-                properties: {
-                  links: {
-                    type: "object",
-                    properties: {
-                      self: { type: "string" },
-                    },
-                  },
-                  data: taskSchema,
-                },
-              },
-            },
-          },
-        },
-        this.getTaskHandler.bind(this)
-      );
+      fastify.route({
+        method: "GET",
+        url: `${prefix}/:taskId`,
+        schema: GET_TASK_SCHEMA,
+        handler: this.getTaskHandler.bind(this),
+      });
     };
   }
 

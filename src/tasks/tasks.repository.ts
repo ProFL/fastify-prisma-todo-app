@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { inject, singleton } from "tsyringe";
 import { AppPrismaClient } from "../db";
-import RecordNotFoundError from "../errors/recordNotFound.error";
+import ResourceNotFoundError from "../errors/resourceNotFound.error";
 import { Task } from "./interfaces/Task";
 import {
   CreateTaskInput,
@@ -46,7 +46,7 @@ export default class TaskRespository {
       },
     })) as Task;
     if (!task) {
-      throw new RecordNotFoundError(`Task with id ${id} not found`);
+      throw new ResourceNotFoundError(`Task with id ${id} not found`);
     }
     return task;
   }
